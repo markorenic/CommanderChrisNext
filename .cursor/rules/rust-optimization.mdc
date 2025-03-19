@@ -1,0 +1,50 @@
+---
+description: Best Practices for Fast Rust Code
+globs: *.rs
+alwaysApply: false
+---
+# Rust Performance Optimization Guidelines
+
+These guidelines provide techniques to make calculations and optimizations in Rust run much faster. Use them to write efficient code by leveraging Rust’s strengths and modern hardware capabilities.
+
+## Choosing Efficient Tools
+- **Select Appropriate Data Structures**: Use `Vec<T>` for dynamic arrays, `std::array<T, N>` for fixed-size arrays, and `HashMap<K, V>` (via `std::collections::HashMap`) for O(1) lookups to reduce time complexity. Example: Use `HashMap` for frequent key-value lookups instead of searching a `Vec`.
+- **Minimize Cache Misses**: Store related data contiguously and process it sequentially to improve memory access speed. Example: Use a flat `Vec<f32>` instead of `Vec<Vec<f32>>` for a matrix to reduce cache misses (e.g., 4 vs. 12 for a 4x4 matrix).
+
+## Reducing Overhead
+- **Minimize Function Calls in Hot Paths**: Inline small, frequently called functions with `#[inline]` to reduce call overhead. Avoid dynamic dispatch (e.g., `Box<dyn Trait>`) where possible; use `&mut dyn Trait` instead to save allocation costs.
+- **Optimize Loops**: Unroll loops manually for small, fixed iterations to reduce control overhead and enhance instruction scheduling. Example: Unrolling a loop can drop execution from 18 ns/iter to 5 ns/iter for repetitive calculations.
+
+## Leveraging Modern Hardware
+- **Use Parallelism**: Split independent computations across CPU cores with `std::thread` or the Rayon crate (e.g., `par_iter()` for parallel iteration). This is ideal for tasks like summing large arrays or processing datasets.
+- **Apply SIMD Instructions**: Use crates like `packed_simd` or `std::simd` for data-parallel operations (e.g., vectorized matrix multiplication). This can significantly speed up numerical computations, especially for large datasets.
+
+## Minimizing Allocations
+- **Avoid Dynamic Allocations**: Preallocate memory where possible (e.g., `Vec::with_capacity(n)`). Use `SmallVec<[T; N]>` (from the `smallvec` crate) fate heapll, temporary data, leverage crates like `smallvec`, `smallstring`, or `tendril` to avoid heap access, reducing latency and cache misses (e.g., 3 cache misses vs. heap).
+
+## Development Best Practices
+- **Compile with Optimization Flags**: Always use `cargo build --release` to enable `-O2` or `-O3` optimizations. Consider Link-Time Optimization (LTO) by adding `lto = true` in `Cargo.toml` for cross-crate inlining.
+- **Profile Regularly**: Use tools like `perf`, `Criterion.rs`, or flame graphs to identify bottlenecks. Example: Profiling might reduce a function from 36 ns/iter to 22 ns/iter by targeting specific inefficiencies.
+
+## Additional Tips
+- **Handle Errors Efficiently**: Use `Result` and `Option` instead of panicking to avoid overhead in error cases, keeping calculations smooth.
+- **Optimize String Handling**: Minimize string copies and conversions by reusing `String` buffers where possible, especially in text-processing calculations.
+- **Use Const Generics**: Leverage compile-time constants with const generics (e.g., `struct Matrix<T, const N: usize>`) for better optimization of known sizes.
+
+## Practical Example
+```rust
+use smallvec::SmallVec;
+use rayon::prelude::*;
+
+// Fast matrix sum with parallelism and stack allocation
+fn fast_matrix_sum(matrix: &[f32]) -> f32 {
+    let chunk_size = 16;
+    let mut sums: SmallVec<[f32; 16]> = SmallVec::with_capacity(chunk_size);
+    
+    matrix.par_chunks(chunk_size)
+        .map(|chunk| chunk.iter().sum::<f32>())
+        .collect_into_vec(&mut sums);
+    
+    sums.into_iter().sum()
+}
+```

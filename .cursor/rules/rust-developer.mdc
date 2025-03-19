@@ -1,0 +1,199 @@
+---
+description: When using Rust follow these instructions
+globs: *.rs
+alwaysApply: true
+---
+# Rust Expert Cursorule
+
+## Handling Uncertainty
+- Ask clarifying questions when requirements or technical details are unclear
+- Be explicit about assumptions made when implementing solutions
+- Acknowledge knowledge gaps and seek information before proceeding
+- Request feedback on design decisions that have multiple valid approaches
+- Check for edge cases and ask how they should be handled
+- Verify understanding of domain-specific requirements
+
+## Code Style
+- Follow the official [Rust Style Guide](mdc:https:/doc.rust-lang.org/1.0.0/style/README.html) and [Rust API Guidelines](mdc:https:/rust-lang.github.io/api-guidelines)
+- Use `snake_case` for variables, functions, modules, and crate names
+- Use `CamelCase` for types, traits, and enum variants
+- Use `SCREAMING_SNAKE_CASE` for constants and static variables
+- Use 4 spaces for indentation, not tabs
+- Limit line length to 100 characters
+- Place opening braces on the same line for control flow and function declarations
+- Use trailing commas in multi-line lists, arrays, and function parameters
+- Use the Rust 2018 edition syntax at minimum
+- Format code using `rustfmt` with default settings
+- Follow clippy suggestions for idiomatic code
+
+## Memory Safety & Ownership
+- Prefer borrowing (`&T`) over owned values when possible
+- Use `&mut T` only when modification is necessary
+- Avoid unnecessary clones and copies
+- Prefer immutability by default
+- Use lifetime annotations explicitly only when necessary
+- Favor `Option<T>` over nullable pointers
+- Use `Result<T, E>` for operations that might fail
+- Avoid unsafe code unless absolutely necessary; accompany with clear comments and safety invariants
+- Maintain the invariants required by standard library components (e.g., Pin guarantees)
+- Understand and respect borrow checker rules and lifetimes
+
+## Functional Programming
+- Use iterators and combinators instead of explicit loops when reasonable
+- Prefer map/filter/fold/collect over manual iteration with mutable state
+- Use closures for short-lived, localized operations
+- Employ pattern matching for complex data extraction
+- Use `let` bindings to break down complex expressions
+- Favor composition of small, focused functions over large, monolithic ones
+
+## Error Handling
+- Follow the [Error Handling Project Group](mdc:https:/github.com/rust-lang/project-error-handling) recommendations
+- Return `Result<T, E>` from functions that can fail
+- Define custom error types for libraries using enums
+- Implement `Error` and `Display` traits for custom error types
+- Consider using `thiserror` for deriving error implementations in libraries
+- Consider using `anyhow` or `eyre` for error handling in applications
+- Prefer the `?` operator for error propagation
+- Handle all error cases explicitly
+- Avoid `.unwrap()` and `.expect()` in production code
+- Use `#[non_exhaustive]` for public error enums that might expand
+
+## Performance Considerations
+- Follow the guidance in the [Rust Performance Book](mdc:https:/nnethercote.github.io/perf-book)
+- Use `Vec<T>` for growable collections and arrays for fixed-size collections
+- Avoid heap allocation when stack allocation is sufficient
+- Employ `String` for owned strings and `&str` for string slices
+- Use specialized iterator methods over generic loops
+- Use `Cow<'a, T>` for conditionally owned data
+- Profile before optimizing; avoid premature optimization
+- Consider using `Rc<T>` for single-threaded shared ownership
+- Be aware of cache locality and data alignment
+- Use `#[inline]` attributes only after profiling confirms the benefit
+
+## Documentation
+- Follow the [rustdoc book](mdc:https:/doc.rust-lang.org/rustdoc) guidelines
+- Document all public items with doc comments (`///`)
+- Include examples in documentation that compile and run correctly
+- Use `//!` for module-level documentation
+- Document panics, errors, and edge cases
+- For complex code, add regular comments (`//`) explaining the "why", not just the "what"
+- Use rustdoc attributes like `#[deprecated]`, `#[must_use]`, etc.
+- Run `cargo doc --open` to preview documentation
+- Use Markdown formatting in doc comments for readability
+- Add cross-references to related items using bracketed links
+
+## Testing
+- Follow the guidance in the [Rust Book testing chapter](mdc:https:/doc.rust-lang.org/book/ch11-00-testing.html)
+- Write unit tests using `#[test]` attribute
+- Use `#[should_panic]` for tests that expect panics
+- Consider property-based testing with `proptest` or similar for complex functions
+- Create integration tests in a `tests/` directory
+- Test both success and failure cases
+- Mock dependencies when necessary using traits
+- Use `cargo test -- --help` to see test execution options
+- Organize tests into modules with descriptive names
+- Consider benchmark tests with `criterion` for performance-critical code
+
+## Dependencies
+- Check the [Rust Security Advisory Database](mdc:https:/rustsec.org) before adding dependencies
+- Choose mature crates with good documentation and active maintenance
+- Prefer standard library solutions when available
+- Use semantic versioning in `Cargo.toml` with appropriate constraints
+- Regularly update dependencies for security fixes using `cargo update`
+- Minimize the number of dependencies
+- Consider feature flags to make dependencies optional
+- Review licensing implications of dependencies
+- Audit dependencies with `cargo audit`
+
+## Pattern Implementations
+- Implement standard traits as described in the [Rust API Guidelines](mdc:https:/rust-lang.github.io/api-guidelines/interoperability.html)
+- Consider deriving common traits using `#[derive(...)]` when appropriate
+- Use the `From`/`Into` traits for type conversions
+- Implement `Default` for types with reasonable defaults
+- Use builder pattern for complex object construction
+- Apply the "newtype" pattern to add type safety to primitive types
+- Follow the principle of least surprise in API design
+- Use const generics for compile-time validated parameters in newer Rust versions
+
+## Concurrent Programming
+- Follow the [Rust Book concurrency chapter](mdc:https:/doc.rust-lang.org/book/ch16-00-concurrency.html) guidance
+- Prefer message passing with channels over shared memory
+- Use `Mutex<T>` for data that needs mutual exclusion
+- Employ `RwLock<T>` for read-mostly workloads
+- Use `Arc<T>` for sharing between threads
+- Prefer `async`/`.await` over raw threads for I/O-bound tasks
+- Use `tokio` or `async-std` for async runtime
+- Consider `rayon` for CPU-bound parallelism
+- Avoid shared mutable state when possible
+- Be aware of deadlock potential in lock acquisition patterns
+- Use atomic operations for simple shared counters and flags
+- Follow the guidance in the [Async Book](mdc:https:/rust-lang.github.io/async-book) for async code
+
+## Modern Rust Features
+- Use `const fn` for compile-time computation
+- Understand and apply pinning correctly following the [Pin documentation](mdc:https:/doc.rust-lang.org/std/pin/index.html)
+- Use Generic Associated Types (GATs) when appropriate
+- Leverage `impl Trait` in argument and return positions
+- Use `async move` for ownership transfer in async blocks
+- Consider `TryFrom`/`TryInto` for fallible conversions
+- Utilize conditional compilation with `cfg` attributes for platform-specific code
+- Use const generics for array handling where appropriate
+
+## Idioms
+- Follow the [Rust Cookbook](mdc:https:/rust-lang-nursery.github.io/rust-cookbook) for common patterns
+- Use the `if let` and `while let` patterns for single-pattern matching
+- Employ `match` for exhaustive pattern matching
+- Use tuple returns for multiple related values
+- Prefer associated methods over free functions
+- Use type aliases to improve readability
+- Employ `PhantomData` for type-level programming
+- Use newtype pattern for stronger typing
+- Leverage generics and traits for code reuse
+- Follow the "fail fast" principle with early returns
+- Use `#![deny(missing_docs)]` to enforce documentation
+
+# Rust Performance Optimization Guidelines
+
+These guidelines provide techniques to make calculations and optimizations in Rust run much faster. Use them to write efficient code by leveraging Rust’s strengths and modern hardware capabilities.
+
+## Choosing Efficient Tools
+- **Select Appropriate Data Structures**: Use `Vec<T>` for dynamic arrays, `std::array<T, N>` for fixed-size arrays, and `HashMap<K, V>` (via `std::collections::HashMap`) for O(1) lookups to reduce time complexity. Example: Use `HashMap` for frequent key-value lookups instead of searching a `Vec`.
+- **Minimize Cache Misses**: Store related data contiguously and process it sequentially to improve memory access speed. Example: Use a flat `Vec<f32>` instead of `Vec<Vec<f32>>` for a matrix to reduce cache misses (e.g., 4 vs. 12 for a 4x4 matrix).
+
+## Reducing Overhead
+- **Minimize Function Calls in Hot Paths**: Inline small, frequently called functions with `#[inline]` to reduce call overhead. Avoid dynamic dispatch (e.g., `Box<dyn Trait>`) where possible; use `&mut dyn Trait` instead to save allocation costs.
+- **Optimize Loops**: Unroll loops manually for small, fixed iterations to reduce control overhead and enhance instruction scheduling. Example: Unrolling a loop can drop execution from 18 ns/iter to 5 ns/iter for repetitive calculations.
+
+## Leveraging Modern Hardware
+- **Use Parallelism**: Split independent computations across CPU cores with `std::thread` or the Rayon crate (e.g., `par_iter()` for parallel iteration). This is ideal for tasks like summing large arrays or processing datasets.
+- **Apply SIMD Instructions**: Use crates like `packed_simd` or `std::simd` for data-parallel operations (e.g., vectorized matrix multiplication). This can significantly speed up numerical computations, especially for large datasets.
+
+## Minimizing Allocations
+- **Avoid Dynamic Allocations**: Preallocate memory where possible (e.g., `Vec::with_capacity(n)`). Use `SmallVec<[T; N]>` (from the `smallvec` crate) fate heapll, temporary data, leverage crates like `smallvec`, `smallstring`, or `tendril` to avoid heap access, reducing latency and cache misses (e.g., 3 cache misses vs. heap).
+
+## Development Best Practices
+- **Compile with Optimization Flags**: Always use `cargo build --release` to enable `-O2` or `-O3` optimizations. Consider Link-Time Optimization (LTO) by adding `lto = true` in `Cargo.toml` for cross-crate inlining.
+- **Profile Regularly**: Use tools like `perf`, `Criterion.rs`, or flame graphs to identify bottlenecks. Example: Profiling might reduce a function from 36 ns/iter to 22 ns/iter by targeting specific inefficiencies.
+
+## Additional Tips
+- **Handle Errors Efficiently**: Use `Result` and `Option` instead of panicking to avoid overhead in error cases, keeping calculations smooth.
+- **Optimize String Handling**: Minimize string copies and conversions by reusing `String` buffers where possible, especially in text-processing calculations.
+- **Use Const Generics**: Leverage compile-time constants with const generics (e.g., `struct Matrix<T, const N: usize>`) for better optimization of known sizes.
+
+## Practical Example
+```rust
+use smallvec::SmallVec;
+use rayon::prelude::*;
+
+// Fast matrix sum with parallelism and stack allocation
+fn fast_matrix_sum(matrix: &[f32]) -> f32 {
+    let chunk_size = 16;
+    let mut sums: SmallVec<[f32; 16]> = SmallVec::with_capacity(chunk_size);
+    
+    matrix.par_chunks(chunk_size)
+        .map(|chunk| chunk.iter().sum::<f32>())
+        .collect_into_vec(&mut sums);
+    
+    sums.into_iter().sum()
+}
+```
