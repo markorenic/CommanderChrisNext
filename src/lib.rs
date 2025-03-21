@@ -1,5 +1,5 @@
 //! # Chris - Terminal Interface for GPT models
-//! 
+//!
 //! This library provides functionality to interact with GPT models
 //! through a terminal interface.
 
@@ -25,4 +25,4 @@ pub mod util;
 pub use api_client::ApiClient;
 pub use cli::{Cli, ReaderMode};
 pub use config_manager::Config;
-pub use error::{AppError, Result}; 
+pub use error::{AppError, Result};

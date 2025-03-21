@@ -3,9 +3,9 @@
 //! This module provides functionality to communicate with various GPT
 //! model providers like OpenAI and OpenRouter.
 
-mod models;
 mod client;
+mod models;
 
 // Re-exports for public API
-pub use client::{ApiClient, ApiClientTrait, OpenAIClient, OpenRouterClient, create_api_client};
-pub use models::Message; 
+pub use client::{create_api_client, ApiClient, ApiClientTrait, OpenAIClient, OpenRouterClient};
+pub use models::Message;

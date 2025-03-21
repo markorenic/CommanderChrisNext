@@ -97,4 +97,4 @@ pub fn api_err<S: Into<String>>(msg: S) -> AppError {
 #[inline]
 pub fn validation_err<S: Into<String>>(msg: S) -> AppError {
     AppError::Validation(msg.into())
-} 
+}

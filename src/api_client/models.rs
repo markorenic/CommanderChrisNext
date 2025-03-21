@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 pub struct Message {
     /// Role of the message sender (e.g., "user", "assistant", "system")
     pub role: String,
-    
+
     /// Content of the message
     pub content: String,
 }
@@ -15,20 +15,20 @@ pub struct Message {
 pub(crate) struct CompletionRequest {
     /// The model to use for completions
     pub model: String,
-    
+
     /// Messages to send to the model
     pub messages: Vec<Message>,
-    
+
     /// Maximum number of tokens to generate
     pub max_tokens: usize,
-    
+
     /// Temperature parameter for controlling randomness
     pub temperature: f32,
-    
+
     /// Referer header for OpenRouter (http_referer variant)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub http_referer: Option<String>,
-    
+
     /// Referer header for OpenRouter (http_referrer variant)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub http_referrer: Option<String>,
@@ -46,4 +46,4 @@ pub(crate) struct CompletionResponse {
 pub(crate) struct Choice {
     /// The message containing the completion
     pub message: Message,
-} 
+}

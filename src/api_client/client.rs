@@ -33,7 +33,7 @@ impl HttpModelClient {
             .timeout(Duration::from_secs(30))
             .build()
             .map_err(|e| api_err(format!("Failed to create HTTP client: {}", e)))?;
-            
+
         Ok(Self { client })
     }
 }
@@ -45,7 +45,7 @@ impl ModelClient for HttpModelClient {
             Provider::OpenAI => self.send_openai_request(messages, config).await?,
             Provider::OpenRouter => self.send_openrouter_request(messages, config).await?,
         };
-        
+
         if !response.status().is_success() {
             let status = response.status();
             let error_text = response
@@ -53,24 +53,30 @@ impl ModelClient for HttpModelClient {
                 .await
                 .unwrap_or_else(|_| "Unknown error".to_string());
             return Err(api_err(format!(
-                "API returned error ({}): {}", 
+                "API returned error ({}): {}",
                 status, error_text
             )));
         }
-        
+
         let completion: CompletionResponse = response
             .json()
             .await
             .map_err(|e| api_err(format!("Failed to parse API response: {}", e)))?;
-            
-        completion.choices.first()
+
+        completion
+            .choices
+            .first()
             .map(|choice| choice.message.content.clone())
             .ok_or_else(|| api_err("API returned no completion choices"))
     }
 }
 
 impl HttpModelClient {
-    async fn send_openai_request(&self, messages: Vec<Message>, config: &Config) -> Result<reqwest::Response> {
+    async fn send_openai_request(
+        &self,
+        messages: Vec<Message>,
+        config: &Config,
+    ) -> Result<reqwest::Response> {
         let mut headers = HeaderMap::new();
         headers.insert(
             AUTHORIZATION,
@@ -78,7 +84,7 @@ impl HttpModelClient {
                 .map_err(|e| api_err(format!("Invalid API key format: {}", e)))?,
         );
         headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
-        
+
         let request = CompletionRequest {
             model: config.openai_model.clone(),
             messages,
@@ -87,7 +93,7 @@ impl HttpModelClient {
             http_referer: None,
             http_referrer: None,
         };
-        
+
         self.client
             .post(config.get_api_url())
             .headers(headers)
@@ -96,8 +102,12 @@ impl HttpModelClient {
             .await
             .map_err(|e| api_err(format!("API request failed: {}", e)))
     }
-    
-    async fn send_openrouter_request(&self, messages: Vec<Message>, config: &Config) -> Result<reqwest::Response> {
+
+    async fn send_openrouter_request(
+        &self,
+        messages: Vec<Message>,
+        config: &Config,
+    ) -> Result<reqwest::Response> {
         let mut headers = HeaderMap::new();
         headers.insert(
             HeaderName::from_static("http_referer"),
@@ -110,7 +120,7 @@ impl HttpModelClient {
                 .map_err(|e| api_err(format!("Invalid API key format: {}", e)))?,
         );
         headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
-        
+
         let request = CompletionRequest {
             model: config.openrouter_model.clone(),
             messages,
@@ -119,7 +129,7 @@ impl HttpModelClient {
             http_referer: Some(config.get_site_url()),
             http_referrer: Some(config.get_site_url()),
         };
-        
+
         self.client
             .post(config.get_api_url())
             .headers(headers)
@@ -141,10 +151,10 @@ impl<T: ModelClient> BaseApiClient<T> {
     fn new(config: Config, client: T) -> Self {
         Self { config, client }
     }
-    
+
     fn create_messages(&self, query: &str, user_context: Option<&UserContext>) -> Vec<Message> {
         let mut messages = Vec::new();
-        
+
         // Add system message
         let system_content = if let Some(context) = user_context {
             format!(
@@ -157,7 +167,7 @@ impl<T: ModelClient> BaseApiClient<T> {
         } else {
             "You are Chris, a helpful AI assistant.".to_string()
         };
-        
+
         messages.push(Message {
             role: "system".to_string(),
             content: system_content,
@@ -185,7 +195,7 @@ impl ApiClientTrait for OpenAIClient {
         let messages = self.base.create_messages(query, user_context);
         self.base.client.send_request(messages, self.config()).await
     }
-    
+
     fn config(&self) -> &Config {
         &self.base.config
     }
@@ -203,7 +213,7 @@ impl ApiClientTrait for OpenRouterClient {
         let messages = self.base.create_messages(query, user_context);
         self.base.client.send_request(messages, self.config()).await
     }
-    
+
     fn config(&self) -> &Config {
         &self.base.config
     }
@@ -212,16 +222,16 @@ impl ApiClientTrait for OpenRouterClient {
 /// Factory function to create the appropriate API client based on the provider
 pub fn create_api_client(config: Config) -> Result<Box<dyn ApiClientTrait>> {
     let http_client = HttpModelClient::new()?;
-    
+
     match config.provider {
-        Provider::OpenAI => Ok(Box::new(OpenAIClient { 
-            base: BaseApiClient::new(config, http_client)
+        Provider::OpenAI => Ok(Box::new(OpenAIClient {
+            base: BaseApiClient::new(config, http_client),
         })),
-        Provider::OpenRouter => Ok(Box::new(OpenRouterClient { 
-            base: BaseApiClient::new(config, http_client)
+        Provider::OpenRouter => Ok(Box::new(OpenRouterClient {
+            base: BaseApiClient::new(config, http_client),
         })),
     }
 }
 
 // Public type alias for backward compatibility
-pub type ApiClient = Box<dyn ApiClientTrait>; 
+pub type ApiClient = Box<dyn ApiClientTrait>;

@@ -6,7 +6,7 @@ use std::process;
 async fn main() {
     // Parse command line arguments
     let cli = Cli::parse();
-    
+
     // Run the CLI
     if let Err(e) = cli.run().await {
         eprintln!("Error: {}", e);
