@@ -1,0 +1,30 @@
+#!/bin/bash
+set -e
+
+echo "Running pre-commit checks..."
+
+# Check if rustfmt is installed
+if ! command -v rustfmt &> /dev/null; then
+    echo "rustfmt is not installed. Please run 'rustup component add rustfmt'."
+    exit 1
+fi
+
+# Check if clippy is installed
+if ! command -v clippy-driver &> /dev/null; then
+    echo "clippy is not installed. Please run 'rustup component add clippy'."
+    exit 1
+fi
+
+# Format all Rust files
+echo "Running rustfmt..."
+cargo fmt -- --check
+
+# Run clippy
+echo "Running clippy..."
+cargo clippy -- -D warnings
+
+# Run tests
+echo "Running tests..."
+cargo test --all-features
+
+echo "All pre-commit checks passed!" 

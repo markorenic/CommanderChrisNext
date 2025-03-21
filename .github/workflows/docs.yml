@@ -1,0 +1,85 @@
+name: Documentation
+
+on:
+  push:
+    branches: [ main, master ]
+  release:
+    types: [published]
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Generate documentation
+        run: |
+          cargo doc --no-deps --all-features
+          
+          # Create redirect from index.html to chris crate documentation
+          echo '<meta http-equiv="refresh" content="0; url=chris/index.html">' > target/doc/index.html
+          
+          # Add custom styles for better appearance
+          cat >> target/doc/rustdoc.css << EOF
+          
+          /* Custom styles for CommanderChrisNext docs */
+          body {
+            line-height: 1.6;
+          }
+          
+          .sidebar {
+            border-right: 1px solid rgba(0, 0, 0, 0.1);
+          }
+          
+          .docblock h1, .docblock h2, .docblock h3, .docblock h4 {
+            margin-top: 1.5em;
+            margin-bottom: 0.8em;
+          }
+          EOF
+          
+          # Copy additional files to the documentation
+          cp README.md target/doc/
+          mkdir -p target/doc/examples
+          if [ -d "examples" ]; then
+            cp examples/*.rs target/doc/examples/ || echo "No examples found"
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: ./target/doc
+
+  deploy:
+    name: Deploy to GitHub Pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v3 

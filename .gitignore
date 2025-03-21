@@ -1,10 +1,24 @@
-target/
-Cargo.lock
+# Rust build artifacts
+/target/
+**/*.rs.bk
+*.pdb
+
+# IDE files
 .idea/
 .vscode/
+*.iml
+.DS_Store
+
+# Environment files
+.env
+.env.local
+
+# Generated documentation
+/doc/
+/target/doc/
+
+# Cargo.lock in libraries should be ignored
+# but we'll keep it for applications
+# Cargo.lock
+
 config.toml
-
-
-# Added by cargo
-
-/target
