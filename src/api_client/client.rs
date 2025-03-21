@@ -48,12 +48,19 @@ impl ModelClient for HttpModelClient {
         
         if !response.status().is_success() {
             let status = response.status();
-            let error_text = response.text().await
+            let error_text = response
+                .text()
+                .await
                 .unwrap_or_else(|_| "Unknown error".to_string());
-            return Err(api_err(format!("API returned error ({}): {}", status, error_text)));
+            return Err(api_err(format!(
+                "API returned error ({}): {}", 
+                status, error_text
+            )));
         }
         
-        let completion: CompletionResponse = response.json().await
+        let completion: CompletionResponse = response
+            .json()
+            .await
             .map_err(|e| api_err(format!("Failed to parse API response: {}", e)))?;
             
         completion.choices.first()
