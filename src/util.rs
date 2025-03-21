@@ -3,6 +3,7 @@ use std::io::{self, Write};
 use std::process::Command;
 
 /// Analyzes a shell command for potential risks
+#[allow(dead_code)]
 fn analyze_command_safety(cmd: &str) -> (bool, Vec<&str>) {
     let dangerous_commands = [
         "rm", "sudo", "mv", "dd", ">", "mkfs", "chmod", "chown", "kill",
@@ -53,7 +54,7 @@ pub fn execute_command(cmd: &str) -> Result<String> {
     }
     if !output.stderr.is_empty() {
         if !result.is_empty() {
-            result.push_str("\n");
+            result.push('\n');
         }
         result.push_str(&String::from_utf8_lossy(&output.stderr));
     }
@@ -139,13 +140,12 @@ pub fn extract_commands(response: &str) -> Vec<String> {
             } else {
                 // End of code block
                 in_code_block = false;
-                if code_block_lang.contains("sh")
+                if (code_block_lang.contains("sh")
                     || code_block_lang.contains("bash")
-                    || code_block_lang.contains("shell")
+                    || code_block_lang.contains("shell"))
+                    && !current_command.trim().is_empty()
                 {
-                    if !current_command.trim().is_empty() {
-                        commands.push(current_command.trim().to_string());
-                    }
+                    commands.push(current_command.trim().to_string());
                 }
             }
         } else if in_code_block {
@@ -179,7 +179,7 @@ pub fn format_response(response: &str) -> String {
                 // Format the code block
                 formatted.push_str("┌── ");
                 formatted.push_str(&code_block_lang);
-                formatted.push_str(" ");
+                formatted.push(' ');
                 formatted.push_str(&"─".repeat(80 - code_block_lang.len() - 6));
                 formatted.push('\n');
 
@@ -189,7 +189,7 @@ pub fn format_response(response: &str) -> String {
                     formatted.push('\n');
                 }
 
-                formatted.push_str("└");
+                formatted.push('└');
                 formatted.push_str(&"─".repeat(80));
                 formatted.push('\n');
             }

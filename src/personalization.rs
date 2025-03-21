@@ -35,7 +35,7 @@ impl fmt::Display for UserContext {
 }
 
 /// Manages personalization features
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Default)]
 pub struct Personalization {
     /// Whether personalization is enabled
     enabled: bool,
@@ -43,16 +43,6 @@ pub struct Personalization {
     debug: bool,
     /// User context information, if available
     user_context: Option<UserContext>,
-}
-
-impl Default for Personalization {
-    fn default() -> Self {
-        Self {
-            enabled: false,
-            debug: false,
-            user_context: None,
-        }
-    }
 }
 
 impl Personalization {

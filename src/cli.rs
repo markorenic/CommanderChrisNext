@@ -1,5 +1,5 @@
 use crate::api_client::{create_api_client, ApiClient};
-use crate::config_manager::Config;
+// use crate::config_manager::Config;
 use crate::error::Result;
 use crate::personalization::Personalization;
 use crate::util;
@@ -94,7 +94,6 @@ impl Cli {
                     config,
                 } => {
                     if *create {
-                        use crate::config_manager::Config;
                         let config_path = config.as_ref().map(|p| p.as_path());
 
                         // If no path specified, use default
@@ -105,7 +104,7 @@ impl Cli {
                         };
 
                         // Create default config
-                        let default_config = Config::default();
+                        let default_config = crate::config_manager::Config::default();
                         default_config.save_to_file(&actual_path)?;
 
                         println!(
